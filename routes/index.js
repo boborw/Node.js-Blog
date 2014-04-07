@@ -3,7 +3,7 @@
  * GET home page.
  */
 var crypto = require('crypto');
-var User = require('./user');
+var User = require('../models/user');
 
 module.exports = function(app){
 	app.get("/",function(req,res){
@@ -13,9 +13,9 @@ module.exports = function(app){
 		res.render("register",{title:"注册"});
 	});
 	app.post("/reg",function(req,res){
-		if(req.body['psw-repeat'] == req.body['psw']){
+		if(req.body['psw-repeat'] != req.body['psw']){
 			req.flash('error','两次输入口令不一致');
-			return res.render('/reg');
+			return res.redirect('/reg');
 		}
 		var md5 = crypto.createHash('md5');
 		var password = md5.update(req.body.psw).digest('base64');
@@ -25,6 +25,7 @@ module.exports = function(app){
 		});
 		User.get(newUser.name,function(err,user){
 			if(user){
+				console.log(user + "****用户已存在***********");
 				err = "用户已存在";
 			}
 			if(err){

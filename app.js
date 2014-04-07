@@ -18,7 +18,8 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 app.use(express.cookieParser());
-app.use(express.favicon()); //设置应用图标
+
+//app.use(express.favicon()); //设置应用图标
 app.use(express.logger('dev')); //设置应用日志中间件，由connect提供
 
 /*
@@ -45,16 +46,26 @@ app.use(express.session({
 			})
 }));
 
-//将router信息抽离出去。 
-app.use(app.router);
-//app.use(express.router(routes));
-routes(app);
+//处理静态文件
 app.use(express.static(path.join(__dirname, 'public')));
-
 // development only
 if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
+
+app.use(function(req,res,next){
+	var error = req.flash('error');
+	var success = req.flash('success')
+	res.locals.error = error.length ?  error : null;
+	res.locals.success = success.length ? success : null;
+	res.locals.user = req.session.user;
+	next();
+});
+// console.log("test use function!");
+//将router信息抽离出去。 
+app.use(app.router);
+//app.use(express.router(routes));
+routes(app);
 
 /* 测试
 app.get('/users', user.list);
